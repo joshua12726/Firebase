@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - QuickOrder</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="receipt-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>🍕 QuickOrder</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="Homepage.html" class="nav-link">Back to Menu</a>
+                <a href="orders.html" class="nav-link">My Orders</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Receipt Section -->
+    <section class="receipt-section">
+        <div class="container">
+            <div class="receipt-container">
+                <div class="receipt-header">
+                    <h1>Order Receipt</h1>
+                    <div class="receipt-actions">
+                        <button class="btn-secondary" onclick="printReceipt()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6,9 6,2 18,2 18,9"></polyline>
+                                <path d="M6,18H4a2,2,0,0,1-2-2V11a2,2,0,0,1,2-2H20a2,2,0,0,1,2,2v5a2,2,0,0,1-2,2H18"></path>
+                                <polyline points="6,14 18,14 18,22 6,22 6,14"></polyline>
+                            </svg>
+                            Print Receipt
+                        </button>
+                        <button class="btn-primary" onclick="downloadReceipt()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Receipt Content -->
+                <div class="receipt-content" id="receipt-content">
+                    <div class="receipt">
+                        <div class="receipt-company">
+                            <h2>🍕 QuickOrder</h2>
+                            <p>Delicious food delivered fast</p>
+                            <p>📞 (555) 123-4567 | 📧 hello@quickorder.com</p>
+                            <p>📍 123 Food Street, Manila, Philippines</p>
+                        </div>
+                        
+                        <div class="receipt-info" id="receipt-info">
+                            <!-- Order information will be populated here -->
+                        </div>
+                        
+                        <div class="receipt-items" id="receipt-items">
+                            <!-- Order items will be populated here -->
+                        </div>
+                        
+                        <div class="receipt-totals" id="receipt-totals">
+                            <!-- Order totals will be populated here -->
+                        </div>
+                        
+                        <div class="receipt-delivery" id="receipt-delivery">
+                            <!-- Delivery information will be populated here -->
+                        </div>
+                        
+                        <div class="receipt-footer">
+                            <div class="receipt-qr">
+                                <div class="qr-code">
+                                    <div class="qr-placeholder">
+                                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                                            <rect width="80" height="80" fill="#000"/>
+                                            <rect x="10" y="10" width="60" height="60" fill="#fff"/>
+                                            <rect x="15" y="15" width="50" height="50" fill="#000"/>
+                                            <rect x="20" y="20" width="40" height="40" fill="#fff"/>
+                                            <rect x="25" y="25" width="30" height="30" fill="#000"/>
+                                        </svg>
+                                    </div>
+                                    <p>Scan for order tracking</p>
+                                </div>
+                            </div>
+                            <div class="receipt-thanks">
+                                <p><strong>Thank you for choosing QuickOrder!</strong></p>
+                                <p>Your order is being prepared with care.</p>
+                                <p>Track your order status in your account dashboard.</p>
+                                <p class="receipt-policy">
+                                    <small>
+                                        For any concerns, please contact us within 24 hours.<br>
+                                        This receipt serves as proof of purchase.
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Receipt Found -->
+                <div class="no-receipt" id="no-receipt" style="display: none;">
+                    <div class="no-receipt-content">
+                        <div class="no-receipt-icon">📄</div>
+                        <h3>No Receipt Found</h3>
+                        <p>We couldn't find the receipt you're looking for.</p>
+                        <div class="no-receipt-actions">
+                            <a href="Homepage.html" class="btn-primary">Back to Menu</a>
+                            <a href="orders.html" class="btn-secondary">View Orders</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Receipt Templates -->
+    <template id="receipt-info-template">
+        <div class="receipt-row">
+            <strong>Order #:</strong>
+            <span class="order-number"></span>
+        </div>
+        <div class="receipt-row">
+            <strong>Date:</strong>
+            <span class="order-date"></span>
+        </div>
+        <div class="receipt-row">
+            <strong>Payment Method:</strong>
+            <span class="payment-method"></span>
+        </div>
+        <div class="receipt-row">
+            <strong>Status:</strong>
+            <span class="order-status"></span>
+        </div>
+    </template>
+
+    <template id="receipt-item-template">
+        <div class="receipt-item">
+            <div class="item-details">
+                <div class="item-name"></div>
+                <div class="item-qty"></div>
+            </div>
+            <div class="item-price"></div>
+        </div>
+    </template>
+
+    <template id="receipt-totals-template">
+        <div class="receipt-total-row">
+            <span>Subtotal:</span>
+            <span class="subtotal-amount"></span>
+        </div>
+        <div class="receipt-total-row">
+            <span>Delivery Fee:</span>
+            <span class="delivery-amount"></span>
+        </div>
+        <div class="receipt-total-row">
+            <span>Tax:</span>
+            <span class="tax-amount"></span>
+        </div>
+        <div class="receipt-total-row final-total">
+            <span>Total:</span>
+            <span class="total-amount"></span>
+        </div>
+    </template>
+
+    <template id="receipt-delivery-template">
+        <h4>Delivery Information</h4>
+        <div class="delivery-info">
+            <div class="delivery-row">
+                <strong>Delivery Address:</strong>
+            </div>
+            <div class="delivery-address"></div>
+            <div class="delivery-row">
+                <strong>Contact Number:</strong>
+                <span class="contact-number"></span>
+            </div>
+            <div class="delivery-row special-instructions" style="display: none;">
+                <strong>Special Instructions:</strong>
+            </div>
+            <div class="special-instructions-text"></div>
+            <div class="delivery-row">
+                <strong>Estimated Delivery:</strong>
+                <span class="delivery-time">25-30 minutes</span>
+            </div>
+        </div>
+    </template>
+
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+    <script src="receipt.js"></script>
+</body>
+</html>

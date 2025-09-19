@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - QuickOrder</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="payment-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>🍕 QuickOrder</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="Homepage.html" class="nav-link">Back to Menu</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Payment Section -->
+    <section class="payment-section">
+        <div class="container">
+            <div class="payment-container">
+                <!-- Order Summary -->
+                <div class="order-summary">
+                    <h2>Order Summary</h2>
+                    <div id="order-items" class="order-items">
+                        <!-- Order items will be populated by JavaScript -->
+                    </div>
+                    <div class="order-total">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">₱0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Delivery Fee:</span>
+                            <span id="delivery-fee">₱2.99</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Tax:</span>
+                            <span id="tax">₱0.00</span>
+                        </div>
+                        <div class="total-row final-total">
+                            <span>Total:</span>
+                            <span id="final-total">₱0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="payment-methods">
+                    <h2>Payment Method</h2>
+                    <div class="payment-options">
+                        <div class="payment-option selected" onclick="selectPaymentMethod('gcash')">
+                            <input type="radio" name="payment" id="gcash" value="gcash" checked>
+                            <label for="gcash">
+                                <div class="payment-icon">
+                                    <img src="gcash.jpg" alt="GCash" style="width: 32px; height: 32px; object-fit: contain;">
+                                </div>
+                                <div class="payment-details">
+                                    <span class="payment-name">GCash</span>
+                                    <span class="payment-desc">Pay with GCash QR code</span>
+                                </div>
+                            </label>
+                        </div>
+
+                   
+                    <!-- GCash Payment Form -->
+                    <div id="gcash-form" class="payment-form" style="display: block;">
+                        <h3>GCash Payment</h3>
+                        <div class="file-upload-section">
+                            <p>Upload your GCash payment proof (receipt or screenshot):</p>
+                            <div class="file-upload-container">
+                                <input type="file" id="gcash-payment-proof" accept="image/*" style="display: none;">
+                                <label for="gcash-payment-proof" class="file-upload-label">
+                                    <div class="upload-icon">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10,9 9,9 8,9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="upload-text">
+                                        <span class="upload-main-text">Click to upload payment proof</span>
+                                        <span class="upload-sub-text">PNG, JPG, JPEG up to 10MB</span>
+                                    </div>
+                                </label>
+                                <div id="gcash-file-preview" class="file-preview" style="display: none;">
+                                    <img id="gcash-preview-image" src="" alt="GCash payment proof preview">
+                                    <button type="button" class="remove-file-btn" onclick="removeGCashFile()">&times;</button>
+                                </div>
+                            </div>
+                            <div id="gcash-file-info" class="file-info" style="display: none;">
+                                <span id="gcash-file-name"></span>
+                                <span id="gcash-file-size"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Payment Form -->
+                    <div id="file-upload-form" class="payment-form" style="display: none;">
+                        <h3>Upload Payment Proof</h3>
+                        <div class="file-upload-section">
+                            <p>Please upload an image of your payment proof (receipt, screenshot, etc.):</p>
+                            <div class="file-upload-container">
+                                <input type="file" id="payment-proof" accept="image/*" style="display: none;">
+                                <label for="payment-proof" class="file-upload-label">
+                                    <div class="upload-icon">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10,9 9,9 8,9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="upload-text">
+                                        <span class="upload-main-text">Click to upload image</span>
+                                        <span class="upload-sub-text">PNG, JPG, JPEG up to 10MB</span>
+                                    </div>
+                                </label>
+                                <div id="file-preview" class="file-preview" style="display: none;">
+                                    <img id="preview-image" src="" alt="Payment proof preview">
+                                    <button type="button" class="remove-file-btn" onclick="removeUploadedFile()">&times;</button>
+                                </div>
+                            </div>
+                            <div id="file-info" class="file-info" style="display: none;">
+                                <span id="file-name"></span>
+                                <span id="file-size"></span>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Delivery Information -->
+                    <div class="delivery-info">
+                        <h3>Delivery Information</h3>
+                        <div class="form-group">
+                            <label for="delivery-address">Delivery Address</label>
+                            <textarea id="delivery-address" placeholder="Enter your complete address" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <button class="place-order-btn" onclick="processPayment()">
+                        <span class="btn-text">Place Order</span>
+                        <span class="btn-total" id="btn-total">₱0.00</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payment Processing Modal -->
+    <div id="payment-modal" class="payment-modal">
+        <div class="payment-modal-content">
+            <div class="payment-processing">
+                <div class="spinner"></div>
+                <h3 id="payment-status">Processing Payment...</h3>
+                <p id="payment-message">Please wait while we process your payment</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receipt-modal" class="receipt-modal">
+        <div class="receipt-content">
+            <div class="receipt-header">
+                <h3>Payment Receipt</h3>
+                <button class="close-receipt" onclick="closeReceipt()">&times;</button>
+            </div>
+            <div class="receipt-body" id="receipt-body">
+                <!-- Receipt content will be generated here -->
+            </div>
+            <div class="receipt-actions">
+                <button class="btn-secondary" onclick="downloadReceipt()">Download PDF</button>
+                <button class="btn-primary" onclick="closeReceipt()">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+    <script src="payment.js"></script>
+</body>
+</html>

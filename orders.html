@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - QuickOrder</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="payment-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        .orders-section {
+            padding: 100px 0 50px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .orders-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .orders-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .orders-header h1 {
+            color: #1a202c;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .orders-header p {
+            color: #718096;
+            font-size: 18px;
+        }
+        
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .order-info h3 {
+            margin: 0;
+            color: #2d3748;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .order-info p {
+            margin: 5px 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .order-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-preparing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-delivered {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .order-items {
+            margin-bottom: 20px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .item-emoji {
+            font-size: 20px;
+        }
+        
+        .item-details h4 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .item-details p {
+            margin: 2px 0 0;
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .item-price {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .order-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-view-receipt {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .btn-view-receipt:hover {
+            background: #f56500;
+        }
+        
+        .btn-reorder {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .btn-reorder:hover {
+            background: #edf2f7;
+        }
+        
+        .empty-orders {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .empty-orders h3 {
+            color: #2d3748;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .empty-orders p {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .empty-orders .btn-primary {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #ff6b35;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .empty-orders .btn-primary:hover {
+            background: #f56500;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .order-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .order-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .btn-small {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>🍕 QuickOrder</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="Homepage.html" class="nav-link">Menu</a>
+                <a href="#" class="nav-link active">Orders</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Orders Section -->
+    <section class="orders-section">
+        <div class="orders-container">
+<div class="orders-header">
+    <h1>Order History</h1>
+    <p>Track your past orders and view receipts</p>
+    <button id="clear-history-btn" class="btn-small" style="background-color: #ef4444; color: white; margin-left: 20px;">Clear History</button>
+</div>
+            
+            <div id="orders-content">
+                <!-- Orders will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Receipt Modal (reuse from payment page) -->
+    <div id="receipt-modal" class="receipt-modal">
+        <div class="receipt-content">
+            <div class="receipt-header">
+                <h3>Order Receipt</h3>
+                <button class="close-receipt" onclick="closeReceipt()">&times;</button>
+            </div>
+            <div class="receipt-body" id="receipt-body">
+                <!-- Receipt content will be generated here -->
+            </div>
+            <div class="receipt-actions">
+                <button class="btn-secondary" onclick="downloadReceipt()">Download PDF</button>
+                <button class="btn-primary" onclick="closeReceipt()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear History Confirmation Modal -->
+    <div id="clear-history-modal" class="receipt-modal">
+        <div class="receipt-content">
+            <div class="receipt-header">
+                <h3>Clear Order History</h3>
+                <button class="close-receipt" onclick="closeClearHistoryModal()">&times;</button>
+            </div>
+            <div class="receipt-body">
+                <p>Are you sure you want to clear your order history? This action cannot be undone.</p>
+            </div>
+            <div class="receipt-actions">
+                <button class="btn-secondary" onclick="closeClearHistoryModal()">Cancel</button>
+                <button class="btn-danger" onclick="confirmClearHistory()">Clear History</button>
+            </div>
+        </div>
+    </div>
+<script type="module" src="firebase-config.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+    <script src="orders.js"></script>
+</body>
+</html>

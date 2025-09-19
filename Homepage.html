@@ -1,0 +1,219 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickOrder - Online Food Ordering Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase-config.js"></script>
+
+    
+</head>
+<body>
+ <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="product/Classic Burger.png" alt="QuickOrder Logo" class="nav-logo-image" />
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="nav-search">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search for food, restaurants..." class="search-input">
+                    <button class="search-btn" onclick="performSearch()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="#menu" class="nav-link">Menu</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <a href="orders.html" class="nav-link">Orders</a>
+                <div class="cart-icon" onclick="toggleCart()">
+                    🛒 <span id="cart-count">0</span>
+                </div>
+                
+                <!-- Profile Section -->
+                <div class="profile-section">
+                    <div class="profile-dropdown" onclick="toggleProfileMenu()">
+                        <div class="profile-avatar">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGRjZCMzUiLz4KPGF2YXRhciBjeD0iMTYiIGN5PSIxMiIgcj0iNSIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTYgMjZjMC01LjUgNC41LTEwIDEwLTEwczEwIDQuNSAxMCAxMCIgZmlsbD0id2hpdGUiLz4KPC9zdmc+" alt="Profile" id="profile-image">
+                        </div>
+                        <span class="profile-name" id="profile-name">Guest</span>
+                        <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6,9 12,15 18,9"></polyline>
+                        </svg>
+                    </div>
+                    
+                    <div class="profile-menu" id="profile-menu">
+                        <div class="profile-menu-header">
+                            <div class="profile-info">
+                                <div class="profile-avatar-large">
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNGRjZCMzUiLz4KPGF2YXRhciBjeD0iMjAiIGN5PSIxNSIgcj0iNiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTggMzJjMC03IDYtMTIgMTItMTJzMTIgNSAxMiAxMiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+" alt="Profile">
+                                </div>
+                                <div class="profile-details">
+                                    <h4 id="profile-menu-name">Guest User</h4>
+                                    <p id="profile-menu-email">guest@quickorder.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-menu-items">
+                            <a href="orders.html" class="profile-menu-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                </svg>
+                                My Orders
+                            </a>
+                            <div class="profile-menu-divider"></div>
+                            <a href="#" class="profile-menu-item" onclick="signOut(); return false;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16,17 21,12 16,7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                Sign Out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+            <div class="carousel" tabindex="0" aria-roledescription="carousel" aria-label="Delicious Burgers Carousel">
+                <div class="carousel-slide active" role="group" aria-roledescription="slide" aria-label="Slide 1 of 3">
+                    <img src="product/Classic Burger.png" alt="Burger 1" />
+                    <div class="carousel-caption">
+                        
+                    </div>
+                </div>
+                <div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="Slide 2 of 3">
+                    <img src="product/Hawaiian Delight.png" alt="Burger 2" />
+                    <div class="carousel-caption">
+                        
+                    </div>
+                </div>
+                <div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="Slide 3 of 3">
+                    <img src="3.jpg" alt="Burger 3" />
+                    <div class="carousel-caption">
+                       
+                    </div>
+                </div>
+                <button class="carousel-btn prev" aria-label="Previous Slide">&#10094;</button>
+                <button class="carousel-btn next" aria-label="Next Slide">&#10095;</button>
+                <div class="carousel-indicators" role="tablist" aria-label="Carousel Navigation">
+                    <button class="carousel-indicator active" role="tab" aria-selected="true" aria-controls="slide1" tabindex="0" aria-label="Go to slide 1"></button>
+                    <button class="carousel-indicator" role="tab" aria-selected="false" aria-controls="slide2" tabindex="-1" aria-label="Go to slide 2"></button>
+                    <button class="carousel-indicator" role="tab" aria-selected="false" aria-controls="slide3" tabindex="-1" aria-label="Go to slide 3"></button>
+                </div>
+            </div>
+    </section>
+
+  <section id="menu" class="menu">
+    <div class="container">
+      <div class="section-header">
+        <h2>Our Delicious Menu</h2>
+        <p>Fresh ingredients, authentic flavors, and unbeatable quality</p>
+      </div>
+
+      <!-- Menu Grid (Firestore will fill this) -->
+      <div class="menu-grid" id="menu-grid"></div>
+    </div>
+  </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Why Choose QuickOrder?</h2>
+                    <p>
+                        We're passionate about delivering exceptional food experiences right to your doorstep. 
+                        With our carefully curated menu, fresh ingredients, and lightning-fast delivery, 
+                        we make sure every meal is a memorable one.
+                    </p>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number">10K+</div>
+                            <div class="stat-label">Happy Customers</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">30min</div>
+                            <div class="stat-label">Avg Delivery</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">4.9★</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                    </div>
+                </div>
+               
+                       
+
+    </section>
+
+
+    <!-- Footer -->
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🍕 QuickOrder</h3>
+                    <p>Delicious food delivered fast to your doorstep.</p>
+                    <div class="contact-info">
+                        <p>📞 09917327092</p>
+                        <p>📧 hello@quickorder.com</p>
+                        <p>📍 123 Food Street, City</p>
+                    </div>
+                </div>
+               
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+               
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 QuickOrder. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Modal -->
+    <div id="cart-modal" class="cart-modal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h3>Your Order</h3>
+                <button class="close-cart" onclick="toggleCart()">&times;</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <p class="empty-cart">Your cart is empty</p>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <strong>Total: ₱<span id="cart-total">0.00</span></strong>
+             
+    </div>
+
+    <script type="module" src="firebase-config.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html> 
